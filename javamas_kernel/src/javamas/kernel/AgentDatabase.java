@@ -31,6 +31,8 @@ import javamas.kernel.utils.FileUtils;
  */
 public final class AgentDatabase<D> extends HashMap<String, D> {
 
+    private static final long serialVersionUID = 1L;
+    
     private File db = null;
 
     /**

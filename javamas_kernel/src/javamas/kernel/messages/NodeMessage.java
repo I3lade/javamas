@@ -24,7 +24,7 @@ public class NodeMessage implements Serializable, Comparable<NodeMessage> {
     /**
      *
      */
-    public Message mes = null;
+    public Message<?> mes = null;
     /**
      *
      */
@@ -34,6 +34,11 @@ public class NodeMessage implements Serializable, Comparable<NodeMessage> {
      */
     public int node = 0;
 
+    /**
+     *
+     * @param o
+     * @return
+     */
     @Override
     public int compareTo(NodeMessage o) {
 	if (o.priority > this.priority) {

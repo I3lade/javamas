@@ -128,7 +128,7 @@ public final class AgentAddress extends HashMap<String, ArrayList<String>> imple
      * @return
      */
     public ArrayList<String> getGroupes() {
-	return new ArrayList(this.keySet());
+	return new ArrayList<>(this.keySet());
     }
 
     /**

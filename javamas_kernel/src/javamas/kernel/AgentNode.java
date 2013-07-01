@@ -41,8 +41,7 @@ import javamas.kernel.messages.NodeMessage;
 public final class AgentNode implements Runnable {
 
     private static AgentNode comm = null;
-    private volatile HashMap<Integer, AbstractAgent> agents = new HashMap<>();
-    private volatile HashMap<String, ArrayList<Integer>> groups = new HashMap<>();
+    private volatile HashMap<Integer, AbstractAgent<?>> agents = new HashMap<>();
     private String ip = "239.255.80.84";
     private int port = 7889;
     private MulticastSocket sok = null;
@@ -84,7 +83,7 @@ public final class AgentNode implements Runnable {
      *
      * @param agt
      */
-    public synchronized void register(AbstractAgent agt) {
+    public synchronized void register(AbstractAgent<?> agt) {
 	agents.put(agt.getHashcode(), agt);
     }
 
@@ -92,7 +91,7 @@ public final class AgentNode implements Runnable {
      *
      * @param agt
      */
-    public synchronized void unregister(AbstractAgent agt) {
+    public synchronized void unregister(AbstractAgent<?> agt) {
 	agents.remove(agt.getHashcode());
 	if (agents.isEmpty()) {
 	    stop();
@@ -105,7 +104,7 @@ public final class AgentNode implements Runnable {
      *
      */
     public synchronized void pauseAll() {
-	for (AbstractAgent a : agents.values()) {
+	for (AbstractAgent<?> a : agents.values()) {
 	    a.pause();
 	}
     }
@@ -114,7 +113,7 @@ public final class AgentNode implements Runnable {
      *
      */
     public synchronized void resumeAll() {
-	for (AbstractAgent a : agents.values()) {
+	for (AbstractAgent<?> a : agents.values()) {
 	    a.resume();
 	}
     }
@@ -123,7 +122,7 @@ public final class AgentNode implements Runnable {
      *
      */
     public synchronized void stopAll() {
-	for (AbstractAgent a : agents.values()) {
+	for (AbstractAgent<?> a : agents.values()) {
 	    a.stop();
 	}
     }
@@ -133,7 +132,7 @@ public final class AgentNode implements Runnable {
      * @param delay
      */
     public synchronized void setDelayAll(int delay) {
-	for (AbstractAgent a : agents.values()) {
+	for (AbstractAgent<?> a : agents.values()) {
 	    a.setDelay(delay);
 	}
     }
@@ -143,7 +142,7 @@ public final class AgentNode implements Runnable {
      * @param hashcode
      * @return
      */
-    public AbstractAgent getAgent(int hashcode) {
+    public AbstractAgent<?> getAgent(int hashcode) {
 	return agents.get(hashcode);
     }
 
@@ -170,7 +169,7 @@ public final class AgentNode implements Runnable {
      * @param hashcode
      * @param mes
      */
-    public synchronized void sendMessage(int hashcode, Message mes) {
+    public synchronized void sendMessage(int hashcode, Message<?> mes) {
 	if (agents.containsKey(new Integer(hashcode))) {
 	    agents.get(hashcode).pushMessage(mes);
 	} else {
@@ -184,7 +183,7 @@ public final class AgentNode implements Runnable {
      * @param role
      * @param mes
      */
-    public synchronized void broadcastMessage(String groupe, String role, Message mes) {
+    public synchronized void broadcastMessage(String groupe, String role, Message<?> mes) {
 	this.broadcastMessage(groupe, role, mes, true);
     }
 
@@ -195,7 +194,7 @@ public final class AgentNode implements Runnable {
      * @param mes
      * @param bcast
      */
-    public synchronized void broadcastMessage(String groupe, String role, Message mes, boolean bcast) {
+    public synchronized void broadcastMessage(String groupe, String role, Message<?> mes, boolean bcast) {
 	for (int hashcode : agents.keySet()) {
 	    if (mes.getSender() != hashcode) {
 		if (agents.get(hashcode).hasGroupe(groupe)) {
@@ -227,12 +226,12 @@ public final class AgentNode implements Runnable {
     /**
      *
      */
-    public void kill() {
+    private void kill() {
 	stop = true;
 	sok.close();
     }
 
-    private void broadcastMessage(Message mes, int hashcode, String groupe, String role) {
+    private void broadcastMessage(Message<?> mes, int hashcode, String groupe, String role) {
 	NodeMessage message = new NodeMessage();
 	message.hashcode = hashcode;
 	message.groupe = groupe;

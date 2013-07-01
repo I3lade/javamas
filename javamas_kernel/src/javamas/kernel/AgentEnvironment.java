@@ -8,7 +8,6 @@ import java.util.HashMap;
  */
 public abstract class AgentEnvironment implements Runnable {
 
-    private HashMap map = new HashMap();
 
     @Override
     public void run() {

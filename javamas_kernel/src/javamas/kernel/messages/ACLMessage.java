@@ -6,6 +6,8 @@ import java.util.ArrayList;
  * message send by Agents
  */
 public class ACLMessage extends Message<String> {
+    
+    private static final long serialVersionUID = 1L;
 
     /**
      * constant identifying the FIPA performative *
@@ -190,7 +192,7 @@ public class ACLMessage extends Message<String> {
     /**
      *
      */
-    public static final ArrayList<String> performatives = new ArrayList();
+    public static final ArrayList<String> performatives = new ArrayList<>();
 
     static { // initialization of the Vector of performatives
 	performatives.add("ACCEPT-PROPOSAL");
@@ -253,7 +255,7 @@ public class ACLMessage extends Message<String> {
      * @param cont the content of the message
      */
     public ACLMessage(int perf, String cont) {
-	this.action = (String) performatives.get(perf);
+	this.action = performatives.get(perf);
 	this.content = cont;
     }
 

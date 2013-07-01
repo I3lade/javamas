@@ -27,7 +27,7 @@ import java.io.Serializable;
  * @author Guillaume Monet <guillaume dot monet at free dot fr>
  * @version 1.0
  */
-public class Message<T> implements Cloneable, Serializable, Comparable<Message> {
+public class Message<T> implements Cloneable, Serializable, Comparable<Message<?>> {
 
     /**
      * High priority
@@ -156,7 +156,7 @@ public class Message<T> implements Cloneable, Serializable, Comparable<Message> 
 
     /**
      *
-     * @return
+     * @return creation
      */
     public final long getTime() {
 	return time;
@@ -164,7 +164,7 @@ public class Message<T> implements Cloneable, Serializable, Comparable<Message> 
 
     /**
      *
-     * @return
+     * @return expire date
      */
     public final long getExpire() {
 	return expire;
@@ -174,16 +174,21 @@ public class Message<T> implements Cloneable, Serializable, Comparable<Message> 
      * @return
      */
     @Override
-    public Message clone() {
+    public Message<?> clone() {
 	try {
-	    return (Message) super.clone();
+	    return (Message<?>) super.clone();
 	} catch (CloneNotSupportedException e) {
 	    throw new InternalError();
 	}
     }
 
+    /**
+     *
+     * @param mess
+     * @return
+     */
     @Override
-    public int compareTo(Message mess) {
+    public int compareTo(Message<?> mess) {
 	if (this.priority < mess.priority) {
 	    return 1;
 	} else if (this.priority > mess.priority) {
@@ -202,7 +207,7 @@ public class Message<T> implements Cloneable, Serializable, Comparable<Message> 
     /**
      * Returns a debug string with enveloppe and content for the message
      *
-     * @return
+     * @return message's content + other info
      */
     @Override
     public String toString() {

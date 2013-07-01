@@ -20,7 +20,7 @@ public final class JarUtils {
      * @param filename
      * @return
      */
-    public static String loadContentFile(Class cls, String filename) {
+    public static String loadContentFile(Class<?> cls, String filename) {
 	String ret = "";
 	BufferedReader rd = new BufferedReader(new InputStreamReader(cls.getResourceAsStream(filename)));
 	String line;

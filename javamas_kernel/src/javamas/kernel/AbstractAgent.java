@@ -26,20 +26,20 @@ import javamas.kernel.utils.SynchronizedPriority;
  * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *
  *
- * @param <T>
+ * @param <T> Class for the agent's inner database
  * @link http://guillaume.monet.free.fr
  * @copyright 2003-2013 Guillaume Monet
  *
  * @author Guillaume Monet <guillaume dot monet at free dot fr>
- * @version 1.2
+ * @version 1.4
  */
 public abstract class AbstractAgent<T> extends Observable implements Serializable, Runnable, Observer {
 
     private int hashcode;
-    private ArrayList<AgentSensor> sensors = new ArrayList<>();
+    private ArrayList<AgentSensor<?>> sensors = new ArrayList<>();
     private AgentDatabase<T> database = null;
     private AgentGUI gui = null;
-    private final SynchronizedPriority<Message> messages = new SynchronizedPriority<>();
+    private final SynchronizedPriority<Message<?>> messages = new SynchronizedPriority<>();
     private final AgentAddress address;
     private final AgentScheduler scheduler;
     private String name = "";
@@ -229,7 +229,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param agt an agent from AgentLibrary
      */
-    public final void launchAgent(AbstractAgent agt) {
+    public final void launchAgent(AbstractAgent<?> agt) {
 	launchAgent(agt, false);
     }
 
@@ -239,7 +239,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param agt the Agent to launch
      * @param async if it's asynchroneous or not
      */
-    public final void launchAgent(AbstractAgent agt, boolean async) {
+    public final void launchAgent(AbstractAgent<?> agt, boolean async) {
 	try {
 	    agt.setGUI(gui);
 	    if (async) {
@@ -262,8 +262,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param hashcode
      * @param mess
      */
-    public final void sendMessage(int hashcode, Message mess) {
-	Message m = mess.clone();
+    public final void sendMessage(int hashcode, Message<?> mess) {
+	Message<?> m = mess.clone();
 	m.setSender(this.hashcode);
 	m.setReceiver(hashcode);
 	AgentNode.getHandle().sendMessage(hashcode, m);
@@ -275,8 +275,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param groupe name for the groupe
      * @param mess message to send
      */
-    public final void broadcastMessage(String groupe, Message mess) {
-	Message m = mess.clone();
+    public final void broadcastMessage(String groupe, Message<?> mess) {
+	Message<?> m = mess.clone();
 	m.setSender(this.hashcode);
 	AgentNode.getHandle().broadcastMessage(groupe, null, m);
     }
@@ -288,8 +288,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param role name of the role
      * @param mess message to send
      */
-    public final void broadcastMessage(String groupe, String role, Message mess) {
-	Message m = mess.clone();
+    public final void broadcastMessage(String groupe, String role, Message<?> mess) {
+	Message<?> m = mess.clone();
 	m.setSender(this.hashcode);
 	AgentNode.getHandle().broadcastMessage(groupe, role, m);
     }
@@ -299,8 +299,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @return a message
      */
-    public final Message waitNextMessage() {
-	Message mess = messages.pop();
+    public final Message<?> waitNextMessage() {
+	Message<?> mess = messages.pop();
 	this.setChanged();
 	AgentProbeValue<Integer> p = new AgentProbeValue<Integer>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
@@ -313,8 +313,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param until time to wait
      * @return a message
      */
-    public final Message waitNextMessage(int until) {
-	Message mess = messages.pop(until);
+    public final Message<?> waitNextMessage(int until) {
+	Message<?> mess = messages.pop(until);
 	this.setChanged();
 	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
@@ -325,7 +325,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param mes
      */
-    public final void pushMessage(Message mes) {
+    public final void pushMessage(Message<?> mes) {
 	messages.push(mes);
 	this.setChanged();
 	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
@@ -539,7 +539,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param agt
      */
-    public void killAgent(AbstractAgent agt) {
+    public void killAgent(AbstractAgent<?> agt) {
 	agt.kill();
     }
 
@@ -547,7 +547,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param sensor
      */
-    public final void addSensor(AgentSensor sensor) {
+    public final void addSensor(AgentSensor<?> sensor) {
 	sensor.addObserver(this);
 	this.sensors.add(sensor);
 
@@ -557,7 +557,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param sensor
      */
-    public final void removeSensor(AgentSensor sensor) {
+    public final void removeSensor(AgentSensor<?> sensor) {
 	sensor.deleteObserver(this);
 	this.sensors.remove(sensor);
     }
@@ -566,28 +566,33 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      */
     public final void flushSensors() {
-	for (AgentSensor sens : sensors) {
+	for (AgentSensor<?> sens : sensors) {
 	    sens.deleteObserver(this);
 	}
 	this.sensors.removeAll(Arrays.asList(this.sensors.toArray()));
     }
 
     /**
-     * @param sensor
+     * Method to override if sensors want to be handled
+     *
+     * @param sensor sensor that trigger the event
      */
-    protected void handleSensor(AgentSensor sensor) {
+    protected void handleSensor(AgentSensor<?> sensor) {
 	System.out.println(sensor.getValue().toString());
     }
 
     /**
      *
-     * @param o
+     * @param o observable that trigger the update event
      * @param arg
+     * @throws ClassCastException  
      */
     @Override
-    public void update(Observable o, Object arg) {
-	if (o instanceof AgentSensor) {
-	    handleSensor((AgentSensor) o);
+    public void update(Observable o, Object arg) throws ClassCastException {
+	if (o instanceof AgentSensor<?>) {
+	    handleSensor((AgentSensor<?>) o);
+	} else {
+	    throw new ClassCastException("Can't cast " + o.getClass() + " to " + AgentSensor.class);
 	}
     }
 }

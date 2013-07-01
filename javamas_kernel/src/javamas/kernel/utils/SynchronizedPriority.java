@@ -13,6 +13,23 @@ import java.util.PriorityQueue;
  */
 public final class SynchronizedPriority<T> extends PriorityQueue<T> implements Serializable, Cloneable {
 
+    private static final long serialVersionUID = 1L;
+
+    /**
+     *
+     */
+    public SynchronizedPriority() {
+	super();
+    }
+
+    /**
+     *
+     * @param queue
+     */
+    public SynchronizedPriority(SynchronizedPriority<T> queue) {
+	super(queue);
+    }
+
     /**
      * push object in the list of data
      *
@@ -59,12 +76,12 @@ public final class SynchronizedPriority<T> extends PriorityQueue<T> implements S
     public synchronized T getNextElement() {
 	return this.peek();
     }
-    
+
     /**
-     *
+     * Remove all elements in the priority queue
      */
-    public synchronized void flush(){
-        this.removeAll(Arrays.asList(this.toArray()));
+    public synchronized void flush() {
+	this.removeAll(Arrays.asList(this.toArray()));
     }
 
     /**
@@ -73,9 +90,7 @@ public final class SynchronizedPriority<T> extends PriorityQueue<T> implements S
      * @return new Queue
      */
     @Override
-    public SynchronizedPriority clone() {
-	SynchronizedPriority tmp = new SynchronizedPriority();
-	tmp.addAll(Arrays.asList(this.toArray()));
-	return tmp;
+    public SynchronizedPriority<T> clone() {
+	return new SynchronizedPriority<>(this);
     }
 }

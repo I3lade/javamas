@@ -9,9 +9,29 @@ import java.util.LinkedList;
  *
  * @param <T>
  * @author Guillaume Monet
- * @version 1.1
+ * @version 1.5
  */
 public class SynchronizedQueue<T> extends LinkedList<T> implements Serializable, Cloneable {
+
+    /**
+     *
+     */
+    public static final long serialVersionUID = 1L;
+
+    /**
+     *
+     */
+    public SynchronizedQueue() {
+	super();
+    }
+
+    /**
+     *
+     * @param queue
+     */
+    public SynchronizedQueue(SynchronizedQueue<T> queue) {
+	super(queue);
+    }
 
     /**
      * push object in the list of data
@@ -65,14 +85,19 @@ public class SynchronizedQueue<T> extends LinkedList<T> implements Serializable,
     }
 
     /**
+     * remove all elements from the queue
+     */
+    public synchronized void flush() {
+	this.removeAll(Arrays.asList(this.toArray()));
+    }
+
+    /**
      * clone the current Stack
      *
      * @return new Queue
      */
     @Override
-    public SynchronizedQueue clone() {
-	SynchronizedQueue tmp = new SynchronizedQueue();
-	tmp.addAll(Arrays.asList(this.toArray()));
-	return tmp;
+    public SynchronizedQueue<T> clone() {
+	return new SynchronizedQueue<>(this);
     }
 }

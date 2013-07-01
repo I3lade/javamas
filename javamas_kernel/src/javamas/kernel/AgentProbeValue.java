@@ -9,6 +9,8 @@ import java.io.Serializable;
  */
 public final class AgentProbeValue<T> implements Serializable {
 
+    private static final long serialVersionUID = 1L;
+    
     private T value;
     private String desc;
 
@@ -26,7 +28,7 @@ public final class AgentProbeValue<T> implements Serializable {
      *
      * @return
      */
-    public Class getClassValue() {
+    public Class<?> getClassValue() {
 	return value.getClass();
     }
 

@@ -10,10 +10,12 @@ import java.util.Observer;
  */
 public final class AgentProbe implements Serializable, Observer {
 
+    private static final long serialVersionUID = 1L;
+
     @Override
     public final void update(Observable o, Object arg) {
-	if (arg instanceof AgentProbeValue) {
-	    this.handleProbe((AgentProbeValue) arg);
+	if (arg instanceof AgentProbeValue<?>) {
+	    this.handleProbe((AgentProbeValue<?>) arg);
 	} else {
 	    System.out.println(arg.toString());
 	}
@@ -24,7 +26,7 @@ public final class AgentProbe implements Serializable, Observer {
      *
      * @param value
      */
-    public void handleProbe(AgentProbeValue value) {
+    public void handleProbe(AgentProbeValue<?> value) {
 	System.out.println(value.toString());
     }
 }
