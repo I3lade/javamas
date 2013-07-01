@@ -31,7 +31,7 @@ import java.util.HashMap;
 public final class AgentAddress extends HashMap<String, ArrayList<String>> implements Serializable {
 
     private int hashcode;
-    private static final long serialVersionUID = 12L;
+    private static final long serialVersionUID = 201307011219L;
 
     /**
      *
@@ -114,7 +114,7 @@ public final class AgentAddress extends HashMap<String, ArrayList<String>> imple
      * @return
      */
     public ArrayList<String> getRoles(String groupe) {
-	ArrayList<String> roles = new ArrayList<String>();
+	ArrayList<String> roles = new ArrayList<>();
 	for (String role : this.get(groupe)) {
 	    if (!roles.contains(role)) {
 		roles.add(role);

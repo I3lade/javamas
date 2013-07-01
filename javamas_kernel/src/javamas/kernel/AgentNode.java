@@ -41,8 +41,8 @@ import javamas.kernel.messages.NodeMessage;
 public final class AgentNode implements Runnable {
 
     private static AgentNode comm = null;
-    private volatile HashMap<Integer, AbstractAgent> agents = new HashMap<Integer, AbstractAgent>();
-    private volatile HashMap<String, ArrayList<Integer>> groups = new HashMap<String, ArrayList<Integer>>();
+    private volatile HashMap<Integer, AbstractAgent> agents = new HashMap<>();
+    private volatile HashMap<String, ArrayList<Integer>> groups = new HashMap<>();
     private String ip = "239.255.80.84";
     private int port = 7889;
     private MulticastSocket sok = null;
@@ -154,7 +154,7 @@ public final class AgentNode implements Runnable {
      * @return
      */
     public synchronized ArrayList<Integer> getAgentsWithRole(String groupe, String role) {
-	ArrayList<Integer> list = new ArrayList<Integer>();
+	ArrayList<Integer> list = new ArrayList<>();
 	for (int hashcode : agents.keySet()) {
 	    if (agents.get(new Integer(hashcode)).hasGroupe(groupe)) {
 		if (agents.get(new Integer(hashcode)).hasRole(role, groupe) || role == null) {
@@ -272,8 +272,7 @@ public final class AgentNode implements Runnable {
 			broadcastMessage(mes.groupe, mes.role, mes.mes, false);
 		    }
 		}
-	    } catch (NullPointerException e) {
-	    } catch (SocketException e) {
+	    } catch (NullPointerException | SocketException e) {
 	    } catch (Exception e) {
 		e.printStackTrace();
 	    }

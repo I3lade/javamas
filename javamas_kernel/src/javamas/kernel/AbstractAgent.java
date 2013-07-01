@@ -36,10 +36,10 @@ import javamas.kernel.utils.SynchronizedPriority;
 public abstract class AbstractAgent<T> extends Observable implements Serializable, Runnable, Observer {
 
     private int hashcode;
-    private ArrayList<AgentSensor> sensors = new ArrayList<AgentSensor>();
+    private ArrayList<AgentSensor> sensors = new ArrayList<>();
     private AgentDatabase<T> database = null;
     private AgentGUI gui = null;
-    private final SynchronizedPriority<Message> messages = new SynchronizedPriority<Message>();
+    private final SynchronizedPriority<Message> messages = new SynchronizedPriority<>();
     private final AgentAddress address;
     private final AgentScheduler scheduler;
     private String name = "";
@@ -316,7 +316,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final Message waitNextMessage(int until) {
 	Message mess = messages.pop(until);
 	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<Integer>("MESSAGES QUEUE", messages.size());
+	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
 	return mess;
     }
@@ -328,7 +328,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void pushMessage(Message mes) {
 	messages.push(mes);
 	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<Integer>("MESSAGES QUEUE", messages.size());
+	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
     }
 
@@ -338,7 +338,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void flushMessage() {
 	messages.flush();
 	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<Integer>("MESSAGES QUEUE", messages.size());
+	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
     }
 
@@ -399,7 +399,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void joinGroupe(String grp) {
 	address.addGroupe(grp);
 	this.setChanged();
-	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<ArrayList<String>>("GROUPS ARRAY", address.getGroupes());
+	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", address.getGroupes());
 	this.notifyObservers(p);
     }
 
@@ -411,7 +411,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void leaveGroupe(String grp) {
 	address.removeGroupe(grp);
 	this.setChanged();
-	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<ArrayList<String>>("GROUPS ARRAY", address.getGroupes());
+	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", address.getGroupes());
 	this.notifyObservers(p);
     }
 
@@ -434,7 +434,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void addRole(String groupe, String role) {
 	address.addRole(groupe, role);
 	this.setChanged();
-	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<ArrayList<String>>("ROLES ARRAY", address.getRoles(groupe));
+	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", address.getRoles(groupe));
 	this.notifyObservers(p);
     }
 
@@ -447,7 +447,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     public final void removeRole(String groupe, String role) {
 	address.removeRole(groupe, role);
 	this.setChanged();
-	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<ArrayList<String>>("ROLES ARRAY", address.getRoles(groupe));
+	AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", address.getRoles(groupe));
 	this.notifyObservers(p);
     }
 
