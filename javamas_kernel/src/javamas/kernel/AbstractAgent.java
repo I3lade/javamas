@@ -169,16 +169,22 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      * Pause the current Agent's life cycle
      *
-     * @see getNextStep()
-     * @see stop()
-     * @see resume()
+     * @see #nextStep()
+     * @see #stop()
+     * @see #resume()
+     * @see #pause(long)
      */
     public final void pause() {
 	scheduler.pause();
     }
 
     /**
+     * Pause the current Agent's life cycle during time
      *
+     * @see #nextStep()
+     * @see #stop()
+     * @see #resume()
+     * @see #pause()
      * @param time
      */
     public final void pause(long time) {
@@ -188,9 +194,10 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      * Resume the current Agent's life cycle
      *
-     * @see nextStep()
-     * @see pause()
-     * @see resume()
+     * @see #stop()
+     * @see #nextStep()
+     * @see #pause()
+     * @see #pause(long)
      */
     public final void resume() {
 	scheduler.resume();
@@ -199,9 +206,10 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      * Stop the current Agent's life cycle
      *
-     * @see nextStep()
-     * @see pause()
-     * @see resume()
+     * @see #nextStep()
+     * @see #pause()
+     * @see #pause(long)
+     * @see #resume()
      */
     public final void stop() {
 	scheduler.stop();
@@ -210,10 +218,11 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      * Set the current delay beetween each Agent's life cycle
      *
-     * @see nextStep()
-     * @see pause()
-     * @see stop()
-     * @see resume()
+     * @see #nextStep()
+     * @see #pause()
+     * @see #pause(long)
+     * @see #stop()
+     * @see #resume()
      * @param delay
      */
     public final void setDelay(int delay) {
@@ -221,8 +230,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * Wait, Stop , Continue the Agent's life cycle Must be use in <b>@see
-     * live</b> method
+     * <html>Wait, Stop , Continue the Agent's life cycle Must be use in <b>@see
+     * #live()</b> method</html>
      * @see setDelay()
      * @see pause()
      * @see stop()

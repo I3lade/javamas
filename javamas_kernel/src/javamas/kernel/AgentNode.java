@@ -41,7 +41,7 @@ import javamas.kernel.messages.NodeMessage;
 public final class AgentNode implements Runnable {
 
     private static AgentNode comm = null;
-    private volatile HashMap<Integer, AbstractAgent<?>> agents = new HashMap<>();
+    private HashMap<Integer, AbstractAgent<?>> agents = new HashMap<>();
     private String ip = "239.255.80.84";
     private int port = 7889;
     private MulticastSocket sok = null;
