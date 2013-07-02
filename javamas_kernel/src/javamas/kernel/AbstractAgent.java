@@ -178,6 +178,14 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     *
+     * @param time
+     */
+    public final void pause(long time) {
+	scheduler.pause(time);
+    }
+
+    /**
      * Resume the current Agent's life cycle
      *
      * @see nextStep()

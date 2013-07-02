@@ -8,7 +8,8 @@ public final class AgentScheduler {
 
     private boolean pause = false;
     private boolean go = true;
-    private int delay = 0;
+    private long delay = 0;
+    private long pause_time = 0;
 
     /**
      *
@@ -16,8 +17,9 @@ public final class AgentScheduler {
      */
     public synchronized boolean nextStep() {
 	try {
-	    while (pause) {
-		this.wait();
+	    while (pause || pause_time > 0) {
+		this.wait(pause_time);
+		this.pause_time = 0;
 	    }
 	    if (delay > 0) {
 		this.wait(delay);
@@ -32,6 +34,14 @@ public final class AgentScheduler {
      */
     public void pause() {
 	this.pause = true;
+    }
+
+    /**
+     *
+     * @param time
+     */
+    public void pause(long time) {
+	this.pause_time = time;
     }
 
     /**
@@ -53,7 +63,7 @@ public final class AgentScheduler {
      *
      * @param delay
      */
-    public void setDelay(int delay) {
+    public void setDelay(long delay) {
 	this.delay = delay;
     }
 }
