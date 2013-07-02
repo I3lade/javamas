@@ -8,7 +8,6 @@ import javamas.kernel.AbstractAgent;
  */
 public class Scheduling extends AbstractAgent {
 
-
     @Override
     public void activate() {
 	System.out.println("HELLO WORLD");
@@ -16,8 +15,9 @@ public class Scheduling extends AbstractAgent {
 
     @Override
     public void live() {
+	int cpt = 0;
 	while (this.nextStep()) {
-	    System.out.println("...");
+	    System.out.println("..." + cpt++);
 	}
     }
 
@@ -30,11 +30,12 @@ public class Scheduling extends AbstractAgent {
 	Scheduling sc = new Scheduling();
 	sc.setDelay(1000);
 	sc.start();
-	Thread.currentThread().sleep(5000);
+	Thread.currentThread().sleep(2000);
 	sc.pause();
 	Thread.currentThread().sleep(2000);
-	sc.setDelay(200);
 	sc.resume();
+	Thread.currentThread().sleep(2000);
+	sc.pause(2000);
 	Thread.currentThread().sleep(5000);
 	sc.stop();
     }
