@@ -19,10 +19,10 @@ public class Probing extends AbstractAgent {
 	this.setDelay(5000);
 	int count = 0;
 	while (this.nextStep()) {
-	    AgentProbeValue<Integer> value = new AgentProbeValue<Integer>("NEW VALUE OF TOTO", count);
+	    AgentProbeValue<Integer> value = new AgentProbeValue<>("NEW VALUE OF TOTO", count);
 	    this.setChanged();
 	    this.notifyObservers(value);
-	    count ++;
+	    count++;
 	}
 
     }
@@ -32,7 +32,12 @@ public class Probing extends AbstractAgent {
     }
 
     public static void main(String[] args) {
-	AgentProbe o = new AgentProbe();
+	AgentProbe o = new AgentProbe() {
+	    @Override
+	    public void handleProbe(AgentProbeValue<?> value) {
+		System.out.println("RES:"+value);
+	    }
+	};
 	Probing pro = new Probing();
 	pro.addProbe(o);
 	pro.start();
