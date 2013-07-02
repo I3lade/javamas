@@ -318,11 +318,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @return a message
      */
     public final Message<?> waitNextMessage() {
-	Message<?> mess = messages.pop();
-	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<Integer>("MESSAGES QUEUE", messages.size());
-	this.notifyObservers(p);
-	return mess;
+	return this.waitNextMessage(0);
     }
 
     /**
@@ -333,9 +329,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      */
     public final Message<?> waitNextMessage(int until) {
 	Message<?> mess = messages.pop(until);
-	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
-	this.notifyObservers(p);
+	this.notifyMessagesChanged();
 	return mess;
     }
 
@@ -345,9 +339,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      */
     public final void pushMessage(Message<?> mes) {
 	messages.push(mes);
-	this.setChanged();
-	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
-	this.notifyObservers(p);
+	this.notifyMessagesChanged();
     }
 
     /**
@@ -355,6 +347,13 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      */
     public final void flushMessage() {
 	messages.flush();
+	this.notifyMessagesChanged();
+    }
+
+    /**
+     * 
+     */
+    private void notifyMessagesChanged() {
 	this.setChanged();
 	AgentProbeValue<Integer> p = new AgentProbeValue<>("MESSAGES QUEUE", messages.size());
 	this.notifyObservers(p);
