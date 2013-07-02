@@ -104,7 +104,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * Life of the agent init initGUI activate live end kill
+     * Life of the agent init initGUI activate live end kill private method
+     * destroy all objects from the agents
      */
     @Override
     public final void run() {
@@ -344,7 +345,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
 
     /**
      *
-     * @return
+     * @return messages queue's size
      */
     public final int getMessages() {
 	return messages.size();
@@ -354,7 +355,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param key
      * @param data
-     * @return
+     * @return stored datas
      */
     public final T store_db(String key, T data) {
 	return database.put(key, data);
@@ -363,7 +364,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      *
      * @param key
-     * @return
+     * @return datas
      */
     public final T get_db(String key) {
 	return database.get(key);
@@ -585,7 +586,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      *
      * @param o observable that trigger the update event
      * @param arg
-     * @throws ClassCastException  
+     * @throws ClassCastException
      */
     @Override
     public void update(Observable o, Object arg) throws ClassCastException {

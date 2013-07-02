@@ -8,7 +8,7 @@ import java.util.Observer;
  *
  * @author Guillaume Monet
  */
-public final class AgentProbe implements Serializable, Observer {
+public abstract class AgentProbe implements Serializable, Observer {
 
     private static final long serialVersionUID = 1L;
 
@@ -17,16 +17,21 @@ public final class AgentProbe implements Serializable, Observer {
 	if (arg instanceof AgentProbeValue<?>) {
 	    this.handleProbe((AgentProbeValue<?>) arg);
 	} else {
-	    System.out.println(arg.toString());
+	    this.handleProbe(arg);
 	}
-
     }
 
     /**
      *
      * @param value
      */
-    public void handleProbe(AgentProbeValue<?> value) {
+    public abstract void handleProbe(AgentProbeValue<?> value);
+
+    /**
+     *
+     * @param value
+     */
+    public void handleProbe(Object value) {
 	System.out.println(value.toString());
     }
 }
