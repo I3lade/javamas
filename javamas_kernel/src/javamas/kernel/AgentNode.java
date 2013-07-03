@@ -197,7 +197,7 @@ public final class AgentNode implements Runnable {
     public synchronized void broadcastMessage(String groupe, String role, Message<?> mes, boolean bcast) {
 	for (int hashcode : agents.keySet()) {
 	    if (mes.getSender() != hashcode) {
-		if (agents.get(hashcode).hasGroupe(groupe)) {
+		if (agents.get(hashcode).hasGroupe(groupe) || groupe == null) {
 		    if (role == null || agents.get(hashcode).hasRole(groupe, role)) {
 			agents.get(hashcode).pushMessage(mes);
 		    }
