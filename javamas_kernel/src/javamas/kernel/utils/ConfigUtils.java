@@ -19,13 +19,13 @@ public final class ConfigUtils {
      * @return
      */
     public static boolean loadConfig() {
-	prop = new Properties();
-	try {
-	    prop.load(ConfigUtils.class.getResourceAsStream("config.properties"));
-	    return true;
-	} catch (Exception e) {
-	    e.printStackTrace();
-	    return false;
-	}
+        prop = new Properties();
+        try {
+            prop.load(ConfigUtils.class.getResourceAsStream("config.properties"));
+            return true;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

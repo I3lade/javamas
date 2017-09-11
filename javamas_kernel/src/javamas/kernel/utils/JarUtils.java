@@ -21,16 +21,16 @@ public final class JarUtils {
      * @return
      */
     public static String loadContentFile(Class<?> cls, String filename) {
-	String ret = "";
-	BufferedReader rd = new BufferedReader(new InputStreamReader(cls.getResourceAsStream(filename)));
-	String line;
-	try {
-	    while ((line = rd.readLine()) != null) {
-		ret += line;
-	    }
-	} catch (IOException ex) {
-	    ex.printStackTrace();
-	}
-	return ret;
+        String ret = "";
+        BufferedReader rd = new BufferedReader(new InputStreamReader(cls.getResourceAsStream(filename)));
+        String line;
+        try {
+            while ((line = rd.readLine()) != null) {
+                ret += line;
+            }
+        } catch (IOException ex) {
+            ex.printStackTrace();
+        }
+        return ret;
     }
 }
