@@ -1,14 +1,29 @@
+/**
+ * JavaMas : Java Multi-Agents System Copyright (C) 2013 Guillaume Monet
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package javamas.kernel.messages;
 
 import java.util.ArrayList;
 
 /**
- * message send by Agents
+ * Original Work by the MaDKit Team : message send by Agents
  */
-public class ACLMessage extends Message<String> {
-    
-    private static final long serialVersionUID = 1L;
+public final class ACLMessage extends Message<String> {
 
+    private static final long serialVersionUID = 1L;
     /**
      * constant identifying the FIPA performative *
      */
@@ -194,29 +209,29 @@ public class ACLMessage extends Message<String> {
      */
     public static final ArrayList<String> performatives = new ArrayList<>();
 
-    static { // initialization of the Vector of performatives
-	performatives.add("ACCEPT-PROPOSAL");
-	performatives.add("AGREE");
-	performatives.add("CANCEL");
-	performatives.add("CFP");
-	performatives.add("CONFIRM");
-	performatives.add("DISCONFIRM");
-	performatives.add("FAILURE");
-	performatives.add("INFORM");
-	performatives.add("INFORM-IF");
-	performatives.add("INFORM-REF");
-	performatives.add("NOT-UNDERSTOOD");
-	performatives.add("PROPOSE");
-	performatives.add("QUERY-IF");
-	performatives.add("QUERY-REF");
-	performatives.add("REFUSE");
-	performatives.add("REJECT-PROPOSAL");
-	performatives.add("REQUEST");
-	performatives.add("REQUEST-WHEN");
-	performatives.add("REQUEST-WHENEVER");
-	performatives.add("SUBSCRIBE");
-	performatives.add("PROXY");
-	performatives.add("PROPAGATE");
+    static {
+        performatives.add("ACCEPT-PROPOSAL");
+        performatives.add("AGREE");
+        performatives.add("CANCEL");
+        performatives.add("CFP");
+        performatives.add("CONFIRM");
+        performatives.add("DISCONFIRM");
+        performatives.add("FAILURE");
+        performatives.add("INFORM");
+        performatives.add("INFORM-IF");
+        performatives.add("INFORM-REF");
+        performatives.add("NOT-UNDERSTOOD");
+        performatives.add("PROPOSE");
+        performatives.add("QUERY-IF");
+        performatives.add("QUERY-REF");
+        performatives.add("REFUSE");
+        performatives.add("REJECT-PROPOSAL");
+        performatives.add("REQUEST");
+        performatives.add("REQUEST-WHEN");
+        performatives.add("REQUEST-WHENEVER");
+        performatives.add("SUBSCRIBE");
+        performatives.add("PROXY");
+        performatives.add("PROPAGATE");
     }
     private String action;
 
@@ -224,8 +239,8 @@ public class ACLMessage extends Message<String> {
      * Default constructor for ACLMessage class
      */
     public ACLMessage() {
-	action = "NOT_UNDERSTOOD_STRING";
-	content = "NO_CONTENT";
+        action = "NOT_UNDERSTOOD_STRING";
+        content = "NO_CONTENT";
     }
 
     /**
@@ -234,7 +249,7 @@ public class ACLMessage extends Message<String> {
      * @param actType the performative
      */
     public ACLMessage(String actType) {
-	action = actType.toUpperCase();
+        action = actType.toUpperCase();
     }
 
     /**
@@ -244,8 +259,8 @@ public class ACLMessage extends Message<String> {
      * @param cont the content of the message
      */
     public ACLMessage(String actType, String cont) {
-	action = actType.toUpperCase();
-	content = cont;
+        action = actType.toUpperCase();
+        content = cont;
     }
 
     /**
@@ -255,8 +270,8 @@ public class ACLMessage extends Message<String> {
      * @param cont the content of the message
      */
     public ACLMessage(int perf, String cont) {
-	this.action = performatives.get(perf);
-	this.content = cont;
+        this.action = performatives.get(perf);
+        this.content = cont;
     }
 
     /**
@@ -265,29 +280,28 @@ public class ACLMessage extends Message<String> {
      * @return String
      */
     public String getAct() {
-	return action;
+        return action;
     }
 
     /**
      * @return
      */
     public String getPerformative() {
-	return getAct();
+        return getAct();
     }
 
-  
     /**
      * @return
      */
     public String getValue() {
-	return getContent();
+        return getContent();
     }
 
     /**
      * @param action
      */
     public void setPerformative(String action) {
-	this.action = action;
+        this.action = action;
     }
 
     /**
@@ -295,6 +309,6 @@ public class ACLMessage extends Message<String> {
      */
     @Override
     public String toString() {
-	return "" + action + " " + content;
+        return "" + action + " " + content;
     }
 }
