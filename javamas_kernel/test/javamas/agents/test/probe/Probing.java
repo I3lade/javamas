@@ -35,7 +35,7 @@ public class Probing extends AbstractAgent {
 	AgentProbe o = new AgentProbe() {
 	    @Override
 	    public void handleProbe(AgentProbeValue<?> value) {
-		System.out.println("RES:"+value);
+		System.out.println("RES:" + value);
 	    }
 	};
 	Probing pro = new Probing();

@@ -1,7 +1,6 @@
 package javamas.agents.test.load;
 
 import javamas.kernel.AbstractAgent;
-import javamas.kernel.AgentNode;
 import javamas.kernel.messages.Message;
 
 /**
@@ -18,8 +17,9 @@ public class Loading extends AbstractAgent {
     protected void live() {
 	int cpt = 0;
 	while (this.nextStep()) {
-	    Message<String> mess = new Message<>(""+cpt);
-	    this.broadcastMessage(null, mess);
+	    Message<String> mess = new Message<>("" + cpt);
+	    String toto = null;
+	    this.broadcastMessage(mess,toto);
 	    cpt++;
 	}
     }
@@ -29,7 +29,6 @@ public class Loading extends AbstractAgent {
     }
 
     public static void main(String[] args) {
-	AgentNode.getHandle().setLocal(false);
 	Loading ld = new Loading();
 	//ld.setDelay(1);
 	ld.start();

@@ -1,62 +1,63 @@
+/**
+ * JavaMas : Java Multi-Agents System Copyright (C) 2013 Guillaume Monet
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package javamas.kernel;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.net.MulticastSocket;
-import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Observable;
+import java.util.Observer;
 import javamas.kernel.messages.Message;
-import javamas.kernel.messages.NodeMessage;
+import javamas.kernel.transport.Transport;
+import javamas.kernel.datas.SynchronizedTree;
 
 /**
  * Project: JavaMAS: Java Multi-Agents System File: AgentNode.java
  *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
- *
  * @link http://guillaume.monet.free.fr
  * @copyright 2003-2013 Guillaume Monet
  *
- * @author Guillaume Monet <guillaume dot monet at free dot fr>
- * @version 1.0
- *
+ * @author Guillaume Monet <guillaume dot monet at free dot fr> @version 1.0
  */
-public final class AgentNode implements Runnable {
+public final class AgentNode implements Observer {
 
     private static AgentNode comm = null;
-    private HashMap<Integer, AbstractAgent<?>> agents = new HashMap<>();
-    private String ip = "239.255.80.84";
-    private int port = 7889;
-    private MulticastSocket sok = null;
-    private int node = 0;
-    private boolean local = true;
-    private boolean stop = false;
+    private HashMap<String, AbstractAgent<?>> agents = new HashMap<>();
+    private ArrayList<Transport> transports = new ArrayList<>();
 
     private AgentNode() {
-	try {
-	    this.node = this.hashCode();
-	    sok = new MulticastSocket(port);
-	    sok.joinGroup(InetAddress.getByName(ip));
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
+    }
+
+    /**
+     *
+     * @param t
+     */
+    public void addTransport(Transport t) {
+        transports.add(t);
+        t.addObserver(this);
+        t.start();
+    }
+
+    /**
+     *
+     * @param t
+     */
+    public void removeTransport(Transport t) {
+        t.deleteObserver(this);
+        transports.remove(t);
     }
 
     /**
@@ -64,19 +65,11 @@ public final class AgentNode implements Runnable {
      * @return
      */
     public static AgentNode getHandle() {
-	if (comm == null) {
-	    comm = new AgentNode();
-	    comm.start();
-	}
-	return comm;
-    }
-
-    /**
-     *
-     * @param local
-     */
-    public void setLocal(boolean local) {
-	this.local = local;
+        if (comm == null) {
+            comm = new AgentNode();
+            comm.start();
+        }
+        return comm;
     }
 
     /**
@@ -84,7 +77,7 @@ public final class AgentNode implements Runnable {
      * @param agt
      */
     public synchronized void register(AbstractAgent<?> agt) {
-	agents.put(agt.getHashcode(), agt);
+        agents.put(agt.getAddress().getId(), agt);
     }
 
     /**
@@ -92,39 +85,39 @@ public final class AgentNode implements Runnable {
      * @param agt
      */
     public synchronized void unregister(AbstractAgent<?> agt) {
-	agents.remove(agt.getHashcode());
-	if (agents.isEmpty()) {
-	    stop();
-	    AgentNode.comm = null;
-	    System.out.println("Node Killed");
-	}
+        agents.remove(agt.getAddress().getId());
+        if (agents.isEmpty()) {
+            stop();
+            AgentNode.comm = null;
+            System.out.println("Node Killed");
+        }
     }
 
     /**
      *
      */
     public synchronized void pauseAll() {
-	for (AbstractAgent<?> a : agents.values()) {
-	    a.pause();
-	}
+        for (AbstractAgent<?> a : agents.values()) {
+            a.pause();
+        }
     }
 
     /**
      *
      */
     public synchronized void resumeAll() {
-	for (AbstractAgent<?> a : agents.values()) {
-	    a.resume();
-	}
+        for (AbstractAgent<?> a : agents.values()) {
+            a.resume();
+        }
     }
 
     /**
      *
      */
     public synchronized void stopAll() {
-	for (AbstractAgent<?> a : agents.values()) {
-	    a.stop();
-	}
+        for (AbstractAgent<?> a : agents.values()) {
+            a.stop();
+        }
     }
 
     /**
@@ -132,149 +125,98 @@ public final class AgentNode implements Runnable {
      * @param delay
      */
     public synchronized void setDelayAll(int delay) {
-	for (AbstractAgent<?> a : agents.values()) {
-	    a.setDelay(delay);
-	}
+        for (AbstractAgent<?> a : agents.values()) {
+            a.setDelay(delay);
+        }
     }
 
     /**
      *
-     * @param hashcode
+     * @param id
      * @return
      */
-    public AbstractAgent<?> getAgent(int hashcode) {
-	return agents.get(hashcode);
+    public AbstractAgent<?> getAgent(String id) {
+        return agents.get(id);
     }
 
     /**
+     * TODO: Correct change message If all receivers found on current node : no
+     * bcast Compare two organizations send or no Really dirty method need to be
+     * improved
      *
-     * @param groupe
-     * @param role
-     * @return
-     */
-    public synchronized ArrayList<Integer> getAgentsWithRole(String groupe, String role) {
-	ArrayList<Integer> list = new ArrayList<>();
-	for (int hashcode : agents.keySet()) {
-	    if (agents.get(new Integer(hashcode)).hasGroupe(groupe)) {
-		if (agents.get(new Integer(hashcode)).hasRole(role, groupe) || role == null) {
-		    list.add(hashcode);
-		}
-	    }
-	}
-	return list;
-    }
-
-    /**
-     *
-     * @param hashcode
      * @param mes
      */
-    public synchronized void sendMessage(int hashcode, Message<?> mes) {
-	if (agents.containsKey(new Integer(hashcode))) {
-	    agents.get(hashcode).pushMessage(mes);
-	} else {
-	    broadcastMessage(mes, hashcode, null, null);
-	}
+    public synchronized void sendMessage(Message<?> mes) {
+        if (mes.getReceivers() != null) {
+            for (String id : mes.getReceivers()) {
+                if (agents.containsKey(id)) {
+                    agents.get(id).pushMessage(mes);
+                } else {
+                    broadcastMessage(mes);
+                }
+            }
+        }
+        if (mes.getOrganizations() != null) {
+            for (SynchronizedTree<String> org : mes.getOrganizations()) {
+                for (String id : agents.keySet()) {
+                    if (!mes.getSender().equals(id)) {
+                        for (SynchronizedTree<String> groups : org.getChilds()) {
+                            if (agents.get(id).hasGroupe(groups.getRoot())) {
+                                if (!groups.isLeaf()) {
+                                    for (SynchronizedTree<String> roles : groups.getChilds()) {
+                                        if (agents.get(id).hasRole(groups.getRoot(), roles.getRoot())) {
+                                            agents.get(id).pushMessage(mes);
+                                        }
+                                    }
+                                } else {
+                                    agents.get(id).pushMessage(mes);
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            broadcastMessage(mes);
+        }
     }
 
     /**
      *
-     * @param groupe
-     * @param role
      * @param mes
      */
-    public synchronized void broadcastMessage(String groupe, String role, Message<?> mes) {
-	this.broadcastMessage(groupe, role, mes, true);
-    }
-
-    /**
-     *
-     * @param groupe
-     * @param role
-     * @param mes
-     * @param bcast
-     */
-    public synchronized void broadcastMessage(String groupe, String role, Message<?> mes, boolean bcast) {
-	for (int hashcode : agents.keySet()) {
-	    if (mes.getSender() != hashcode) {
-		if (agents.get(hashcode).hasGroupe(groupe) || groupe == null) {
-		    if (role == null || agents.get(hashcode).hasRole(groupe, role)) {
-			agents.get(hashcode).pushMessage(mes);
-		    }
-		}
-	    }
-	}
-	if (bcast && !local) {
-	    this.broadcastMessage(mes, 0, groupe, role);
-	}
+    private void broadcastMessage(Message<?> mes) {
+        for (Transport t : transports) {
+            t.sendMessage(mes);
+        }
     }
 
     /**
      *
      */
     public void start() {
-	(new Thread(this)).start();
+        //(new Thread(this)).start();
     }
 
     /**
      *
      */
     public void stop() {
-	this.kill();
+        this.kill();
     }
 
     /**
      *
      */
     private void kill() {
-	stop = true;
-	sok.close();
-    }
-
-    private void broadcastMessage(Message<?> mes, int hashcode, String groupe, String role) {
-	NodeMessage message = new NodeMessage();
-	message.hashcode = hashcode;
-	message.groupe = groupe;
-	message.role = role;
-	message.mes = mes;
-	message.node = this.node;
-	try {
-	    ByteArrayOutputStream bout = new ByteArrayOutputStream();
-	    ObjectOutputStream out = new ObjectOutputStream(bout);
-	    out.writeObject(message);
-	    out.close();
-	    byte[] msg = bout.toByteArray();
-	    DatagramPacket hi = new DatagramPacket(msg, msg.length, InetAddress.getByName(ip), port);
-	    sok.send(hi);
-	} catch (Exception e) {
-	    e.printStackTrace();
-	}
+        for (Transport t : transports) {
+            t.close();
+        }
     }
 
     @Override
-    public void run() {
-	DatagramPacket recv;
-	ByteArrayInputStream bin;
-	ObjectInputStream in;
-	while (!stop) {
-	    try {
-		byte[] buf = new byte[8192];
-		recv = new DatagramPacket(buf, buf.length);
-		sok.receive(recv);
-		bin = new ByteArrayInputStream(recv.getData());
-		in = new ObjectInputStream(bin);
-		NodeMessage mes = (NodeMessage) in.readObject();
-		if (mes.node != node) {
-		    if (mes.hashcode > 0) {
-			sendMessage(mes.hashcode, mes.mes);
-		    } else {
-			broadcastMessage(mes.groupe, mes.role, mes.mes, false);
-		    }
-		}
-	    } catch (NullPointerException | SocketException e) {
-	    } catch (Exception e) {
-		e.printStackTrace();
-	    }
-	}
+    public void update(Observable o, Object arg) {
+        if (arg instanceof Message) {
+            this.sendMessage((Message) arg);
+        }
     }
 }

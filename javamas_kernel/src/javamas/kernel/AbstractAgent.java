@@ -1,59 +1,60 @@
+/**
+ * JavaMas : Java Multi-Agents System Copyright (C) 2013 Guillaume Monet
+ *
+ * This program is free software: you can redistribute it and/or modify it under
+ * the terms of the GNU General Public License as published by the Free Software
+ * Foundation, either version 3 of the License, or (at your option) any later
+ * version.
+ *
+ * This program is distributed in the hope that it will be useful, but WITHOUT
+ * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
+ * FOR A PARTICULAR PURPOSE. See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License along with
+ * this program. If not, see <http://www.gnu.org/licenses/>.
+ */
 package javamas.kernel;
 
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Observable;
 import java.util.Observer;
 import javamas.kernel.messages.Message;
-import javamas.kernel.utils.SynchronizedPriority;
+import javamas.kernel.datas.SynchronizedPriority;
+import javamas.kernel.datas.SynchronizedTree;
 
 /**
  * Project: JavaMAS: Java Multi-Agents System File: AbstractAgent.java
- *
- * This library is free software; you can redistribute it and/or modify it under
- * the terms of the GNU Lesser General Public License as published by the Free
- * Software Foundation; either version 2.1 of the License, or (at your option)
- * any later version.
- *
- * This library is distributed in the hope that it will be useful, but WITHOUT
- * ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS
- * FOR A PARTICULAR PURPOSE. See the GNU Lesser General Public License for more
- * details.
- *
- * You should have received a copy of the GNU Lesser General Public License
- * along with this library; if not, write to the Free Software Foundation, Inc.,
- * 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
- *
  *
  * @param <T> Class for the agent's inner database
  * @link http://guillaume.monet.free.fr
  * @copyright 2003-2013 Guillaume Monet
  *
- * @author Guillaume Monet <guillaume dot monet at free dot fr>
- * @version 1.4
+ * @author Guillaume Monet <guillaume dot monet at free dot fr> @version 1.5
  */
 public abstract class AbstractAgent<T> extends Observable implements Serializable, Runnable, Observer {
-    
-    private int hashcode;
-    private ArrayList<AgentSensor<?>> sensors = new ArrayList<>();
-    private ArrayList<AgentProbe> probes = new ArrayList<>();
-    private AgentDatabase<T> database = null;
-    private AgentGUI gui = null;
+
+    private AgentAddress address;
+    private transient AgentGUI gui = null;
+    private final ArrayList<AgentSensor<?>> sensors = new ArrayList<>();
+    private final ArrayList<AgentProbe> probes = new ArrayList<>();
     private final SynchronizedPriority<Message<?>> messages = new SynchronizedPriority<>();
-    private final AgentAddress address;
-    private final AgentScheduler scheduler;
+    private final AgentGRManager grmanager = new AgentGRManager();
+    private final AgentScheduler scheduler = new AgentScheduler();
+    private final AgentHistory history = new AgentHistory();
+    private final AgentDatabase<T> database = null;
     private String name = "";
-    private boolean daemon = false;
+    private transient boolean daemon = false;
     private static final long serialVersionUID = 20130619L;
+    public boolean killed = false;
 
     /**
      * Create new Agent
      */
     public AbstractAgent() {
-        this.scheduler = new AgentScheduler();
-        this.hashcode = this.hashCode();
-        address = new AgentAddress(this.hashcode);
+        address = new AgentAddress(this.hashCode());
         //database = new AgentDatabase<T>(true);
         this.register();
     }
@@ -152,7 +153,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     /**
      * end of the agent
      */
-    public abstract void end();
+    protected abstract void end();
 
     /**
      * Kill de agent
@@ -165,6 +166,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
         if (this.hasGUI()) {
             this.gui.close();
         }
+        this.killed = true;
     }
 
     /**
@@ -231,12 +233,14 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * <html>Wait, Stop , Continue the Agent's life cycle Must be use in <b>@see
-     * #live()</b> method</html>
+     * Wait, Stop , Continue the Agent's life cycle<br />
+     * Must be use in live() method
+     *
      * @see setDelay()
      * @see pause()
      * @see stop()
      * @see resume()
+     * @see live()
      * @return if life cycle can proceed
      */
     public final boolean nextStep() {
@@ -277,40 +281,91 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Send message to one agent
      *
-     * @param hashcode
      * @param mess
+     * @param adr
      */
-    public final void sendMessage(int hashcode, Message<?> mess) {
+    public final void sendMessage(Message<?> mess, String adr) {
         Message<?> m = mess.clone();
-        m.setSender(this.hashcode);
-        m.setReceiver(hashcode);
-        AgentNode.getHandle().sendMessage(hashcode, m);
+        m.setSender(this.address.getId());
+        m.addReceiver(adr);
+        AgentNode.getHandle().sendMessage(m);
     }
 
     /**
-     * Send a message to all Agents of a groupe
+     * Send message to multiple agents
      *
-     * @param groupe name for the groupe
+     * @param mess
+     * @param adrs
+     */
+    public final void sendMessage(Message<?> mess, ArrayList<String> adrs) {
+        Message<?> m = mess.clone();
+        m.setSender(this.address.getId());
+        m.setReceivers(adrs);
+    }
+
+    /*
+	 public final Message sendMessageWaitReply(Message<?> mess, AgentAddress... adrs) {
+	 for (AgentAddress adr : adrs) {
+	 }
+	 return null;
+	 }*/
+    /**
+     * Send a message to all agents of a groupe
+     *
+     * @param group
      * @param mess message to send
      */
-    public final void broadcastMessage(String groupe, Message<?> mess) {
+    public final void broadcastMessage(Message<?> mess, String group) {
         Message<?> m = mess.clone();
-        m.setSender(this.hashcode);
-        AgentNode.getHandle().broadcastMessage(groupe, null, m);
+        m.setSender(this.address.getId());
+        SynchronizedTree<String> t = new SynchronizedTree<>(AgentGRManager.ROOT_ORGANIZATION);
+        t.addNode(group);
+        m.addOrganization(t);
+        AgentNode.getHandle().sendMessage(m);
     }
 
     /**
-     * Send a message to to all Agents of a group with role
+     * Send a message to all agents of a group with role
      *
-     * @param groupe name of the groupe
+     * @param group
      * @param role name of the role
      * @param mess message to send
      */
-    public final void broadcastMessage(String groupe, String role, Message<?> mess) {
+    public final void broadcastMessage(Message<?> mess, String group, String role) {
         Message<?> m = mess.clone();
-        m.setSender(this.hashcode);
-        AgentNode.getHandle().broadcastMessage(groupe, role, m);
+        m.setSender(this.address.getId());
+        SynchronizedTree<String> t = new SynchronizedTree<>(AgentGRManager.ROOT_ORGANIZATION);
+        t.addNode(group).addNode(role);
+        m.addOrganization(t);
+        AgentNode.getHandle().sendMessage(m);
+    }
+
+    /**
+     *
+     * @param mess
+     * @param t
+     */
+    public final void broadcastMessage(Message<?> mess, SynchronizedTree<String> t) {
+        Message<?> m = mess.clone();
+        m.setSender(this.address.getId());
+        m.addOrganization(t);
+        AgentNode.getHandle().sendMessage(m);
+    }
+
+    /**
+     *
+     * @param mess
+     * @param organizations
+     */
+    public final void broadcastMessage(Message<?> mess, ArrayList<SynchronizedTree<String>> organizations) {
+        Message<?> m = mess.clone();
+        m.setSender(this.address.getId());
+        for (SynchronizedTree<String> t : organizations) {
+            m.addOrganization(t);
+        }
+        AgentNode.getHandle().sendMessage(m);
     }
 
     /**
@@ -335,16 +390,27 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Add message to inner queue
      *
      * @param mes
      */
     public final void pushMessage(Message<?> mes) {
         messages.push(mes);
+        history.add(mes);
         this.notifyMessagesChanged();
     }
 
     /**
      *
+     * @param conditions
+     * @return
+     */
+    public final ArrayList<Message> retreiveMessage(HashMap<String, String> conditions) {
+        return history.getMessages(conditions);
+    }
+
+    /**
+     * Remove all messages from queue
      */
     public final void flushMessage() {
         messages.flush();
@@ -361,6 +427,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Return the messages queue's size
      *
      * @return messages queue's size
      */
@@ -388,20 +455,20 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * print the string
+     * print something in current output or in the gui if is defined
      *
-     * @param str a string
+     * @param str something to print
      */
-    public final void println(String str) {
+    public final void println(Object str) {
         try {
-            if (hasGUI()) {
+            if (this.hasGUI()) {
                 try {
-                    gui.write(str);
+                    gui.write(str.toString());
                 } catch (Exception er) {
-                    System.out.println(this.name + this.getHashcode() + ":" + str);
+                    System.out.println(this.name + this.address.toString() + ":" + str);
                 }
             } else {
-                System.out.println(this.name + this.getHashcode() + ":" + str);
+                System.out.println(this.name + this.address.toString() + ":" + str);
             }
         } catch (NullPointerException e) {
         } catch (Exception e) {
@@ -410,26 +477,26 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * join a group of agent
+     * join a group
      *
-     * @param grp name of the groupe
+     * @param grp name of the group
      */
     public final void joinGroupe(String grp) {
-        address.addGroupe(grp);
+        grmanager.addGroupe(grp);
         this.setChanged();
-        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", address.getGroupes());
+        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", grmanager.getGroupes());
         this.notifyObservers(p);
     }
 
     /**
      * leave the groupe
      *
-     * @param grp name of the groupe
+     * @param grp name of the group
      */
     public final void leaveGroupe(String grp) {
-        address.removeGroupe(grp);
+        grmanager.removeGroupe(grp);
         this.setChanged();
-        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", address.getGroupes());
+        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("GROUPS ARRAY", grmanager.getGroupes());
         this.notifyObservers(p);
     }
 
@@ -440,7 +507,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @return if Agent's in this groupe
      */
     public final boolean hasGroupe(String grp) {
-        return address.hasGroupe(grp);
+        return grmanager.hasGroupe(grp);
     }
 
     /**
@@ -450,9 +517,9 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param role name of the role
      */
     public final void addRole(String groupe, String role) {
-        address.addRole(groupe, role);
+        grmanager.addRole(groupe, role);
         this.setChanged();
-        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", address.getRoles(groupe));
+        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", grmanager.getRoles(groupe));
         this.notifyObservers(p);
     }
 
@@ -463,9 +530,9 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @param role name of the role
      */
     public final void removeRole(String groupe, String role) {
-        address.removeRole(groupe, role);
+        grmanager.removeRole(groupe, role);
         this.setChanged();
-        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", address.getRoles(groupe));
+        AgentProbeValue<ArrayList<String>> p = new AgentProbeValue<>("ROLES ARRAY", grmanager.getRoles(groupe));
         this.notifyObservers(p);
     }
 
@@ -477,7 +544,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
      * @return if Agent is in Groupe and Role
      */
     public final boolean hasRole(String groupe, String role) {
-        return address.hasRole(groupe, role);
+        return grmanager.hasRole(groupe, role);
     }
 
     /**
@@ -488,11 +555,12 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Get the current AgentAddress
      *
      * @return
      */
-    public final int getHashcode() {
-        return hashcode;
+    public final AgentAddress getAddress() {
+        return address;
     }
 
     /**
@@ -531,6 +599,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Add probe in the agent
      *
      * @param obs
      */
@@ -540,6 +609,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Remove probe in the agent
      *
      * @param obs
      */
@@ -549,22 +619,24 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     *
+     * Remove all probes
      */
     public final void flushProbes() {
         this.deleteObservers();
         this.probes.removeAll(this.probes);
     }
-    
+
     /**
-     * 
-     * @return 
+     * Return all probes
+     *
+     * @return
      */
     public final ArrayList<AgentProbe> getProbes() {
         return this.probes;
     }
 
     /**
+     * Kill an agent
      *
      * @param agt
      */
@@ -573,16 +645,18 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Add a sensor
      *
      * @param sensor
      */
     public final void addSensor(AgentSensor<?> sensor) {
         sensor.addObserver(this);
         this.sensors.add(sensor);
-        
+
     }
 
     /**
+     * Remove a sensor
      *
      * @param sensor
      */
@@ -592,7 +666,7 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     *
+     * Remove all the sensors
      */
     public final void flushSensors() {
         for (AgentSensor<?> sens : sensors) {
@@ -602,7 +676,8 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
-     * Method to override if sensors want to be handled
+     * Method to override if sensors want to be handled Handle trigger of the
+     * sensor (pattern observer is used)
      *
      * @param sensor sensor that trigger the event
      */
@@ -611,13 +686,14 @@ public abstract class AbstractAgent<T> extends Observable implements Serializabl
     }
 
     /**
+     * Handle update for observer pattern
      *
      * @param o observable that trigger the update event
      * @param arg
      * @throws ClassCastException
      */
     @Override
-    public void update(Observable o, Object arg) throws ClassCastException {
+    public final void update(Observable o, Object arg) throws ClassCastException {
         if (o instanceof AgentSensor<?>) {
             handleSensor((AgentSensor<?>) o);
         } else {
