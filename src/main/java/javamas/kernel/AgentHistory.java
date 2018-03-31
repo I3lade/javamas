@@ -26,7 +26,7 @@ import javamas.kernel.messages.Message;
  *
  * @author Guillaume Monet
  */
-public final class AgentHistory extends ArrayList<Message<?>> {
+public class AgentHistory extends ArrayList<Message<?>> {
 
     /**
      *
