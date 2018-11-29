@@ -33,9 +33,9 @@ import java.util.HashMap;
 import fr.eloane.javamas.kernel.utils.FileUtils;
 
 /**
- * 
+ *
  * @author Guillaume Monet
- * @param <T> 
+ * @param <T>
  */
 public final class Database<T> extends HashMap<String, T> {
 
