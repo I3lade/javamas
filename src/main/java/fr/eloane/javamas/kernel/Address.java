@@ -38,7 +38,6 @@ public final class Address implements Serializable {
 
     /**
      *
-     * @param hashcode
      */
     public Address() {
         this.id = "A:" + ((int) (Math.random() * 1000000)) + "@" + Node.getHandle().hashCode();
