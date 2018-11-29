@@ -24,7 +24,7 @@
 package fr.eloane.javamas.agents.test.probe;
 
 import fr.eloane.javamas.kernel.Agent;
-import fr.eloane.javamas.kernel.Probe;
+import fr.eloane.javamas.kernel.probes.Probe;
 import fr.eloane.javamas.kernel.AgentProbeValue;
 
 /**
@@ -61,7 +61,7 @@ public class Probing extends Agent {
             }
         };
         Probing pro = new Probing();
-        pro.addProbe(o);
+        pro.getProbesManager().addProbe(o);
         pro.start();
     }
 }

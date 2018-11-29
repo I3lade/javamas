@@ -1,4 +1,4 @@
-/* 
+/*
  * The MIT License
  *
  * Copyright 2018 Guillaume Monet.
@@ -23,46 +23,10 @@
  */
 package fr.eloane.javamas.agents.test.sensors;
 
-import fr.eloane.javamas.kernel.Agent;
-
 /**
  *
  * @author Guillaume Monet
  */
-public class Sensor extends Agent {
-
-    private int sensor_value = 0;
-
-    @Override
-    protected void activate() {
-    }
-
-    @Override
-    protected void live() {
-        while (this.nextStep()) {
-            System.out.println(sensor_value);
-        }
-    }
-
-    @Override
-    public void end() {
-    }
-
-    @Override
-    protected void handleSensor(fr.eloane.javamas.kernel.sensors.Sensor sensor) {
-        this.sensor_value = (Integer) sensor.getValue();
-    }
-
-    public static void main(String[] args) throws InterruptedException {
-        fr.eloane.javamas.kernel.sensors.Sensor<Integer> sensor = new fr.eloane.javamas.kernel.sensors.Sensor<>(1);
-        Sensor sens = new Sensor();
-        sens.getSensorsManager().addSensor(sensor);
-        sens.setDelay(500);
-        sens.start();
-        Thread.sleep(5000);
-        sensor.setValue(new Integer(110));
-        Thread.sleep(5000);
-        sensor.setValue(new Integer(210));
-        sens.stop();
-    }
+public class SensorsManager {
+    
 }
