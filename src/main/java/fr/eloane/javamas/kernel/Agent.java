@@ -23,6 +23,8 @@
  */
 package fr.eloane.javamas.kernel;
 
+import fr.eloane.javamas.kernel.probes.Probe;
+import fr.eloane.javamas.kernel.sensors.Sensor;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -31,17 +33,22 @@ import java.util.Observer;
 import fr.eloane.javamas.kernel.messages.Message;
 import fr.eloane.javamas.kernel.datas.SynchronizedPriority;
 import fr.eloane.javamas.kernel.organization.Organization;
+import fr.eloane.javamas.kernel.probes.ProbesManager;
+import fr.eloane.javamas.kernel.sensors.SensorsManager;
 
 /**
  *
  * @author Guillaume Monet
  * @param <T>
  */
-public abstract class Agent<T> extends Observable implements Serializable, Runnable, Observer {
+public abstract class Agent<T> extends AbstractAgent implements Serializable, Runnable, Observer {
 
     private static final long serialVersionUID = -3591756155645176746L;
 
     private Address address;
+    private final SensorsManager sensorsManager = new SensorsManager(this);
+    private final ProbesManager probesManager = new ProbesManager(this);
+
     private final ArrayList<Sensor<?>> sensors = new ArrayList<>();
     private final ArrayList<Probe> probes = new ArrayList<>();
     private final SynchronizedPriority<Message<?>> messages = new SynchronizedPriority<>();
@@ -51,7 +58,6 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
     private final Database<T> database = null;
     private String name = "";
     private transient boolean daemon = false;
-    private boolean killed = false;
 
     /**
      * Create new Agent
@@ -131,36 +137,14 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
     }
 
     /**
-     * Initialize of the Agent can be overridden
-     */
-    protected void init() {
-    }
-
-    /**
-     * Active the agent Initialize all things Agent life need
-     */
-    protected abstract void activate();
-
-    /**
-     * life of the agent
-     */
-    protected abstract void live();
-
-    /**
-     * end of the agent
-     */
-    protected abstract void end();
-
-    /**
      * Kill de agent
      */
     private void kill() {
         this.unregister();
         this.flushMessage();
-        this.flushProbes();
-        this.flushSensors();
+        this.getProbesManager().flushProbes();
+        this.getSensorsManager().flushSensors();
         this.scheduler.stop();
-        this.killed = true;
     }
 
     /**
@@ -172,7 +156,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @see #pause(long)
      */
     public final void pause() {
-        scheduler.pause();
+        this.scheduler.pause();
     }
 
     /**
@@ -185,7 +169,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @param time
      */
     public final void pause(long time) {
-        scheduler.pause(time);
+        this.scheduler.pause(time);
     }
 
     /**
@@ -197,7 +181,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @see #pause(long)
      */
     public final void resume() {
-        scheduler.resume();
+        this.scheduler.resume();
     }
 
     /**
@@ -209,7 +193,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @see #resume()
      */
     public final void stop() {
-        scheduler.stop();
+        this.scheduler.stop();
     }
 
     /**
@@ -223,7 +207,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @param delay
      */
     public final void setDelay(int delay) {
-        scheduler.setDelay(delay);
+        this.scheduler.setDelay(delay);
     }
 
     /**
@@ -238,7 +222,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      * @return if life cycle can proceed
      */
     public final boolean nextStep() {
-        return scheduler.nextStep();
+        return this.scheduler.nextStep();
     }
 
     /**
@@ -372,45 +356,6 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
         return this.grmanager;
     }
 
-    /*
-    public final void joinCommunity(String community) {
-        this.grmanager.joinCommunity(community);
-    }
-
-    public final void leaveCommunity(String community) {
-        this.grmanager.leaveCommunity(community);
-    }
-
-    public final boolean isInCommunity(String community) {
-        return this.grmanager.isInCommunity(community);
-    }
-
-    public final void joinGroup(String community, String group) {
-        this.grmanager.joinGroup(community, group);
-    }
-
-    public final void leaveGroup(String community, String group) {
-        this.grmanager.leaveGroup(community, group);
-    }
-
-    public final boolean isInGroup(String community, String group) {
-        return this.grmanager.isInGroup(community, group);
-    }
-
-    public final void addRole(String community, String group, String role) {
-        this.grmanager.addRole(community, group, role);
-        this.setChanged();
-    }
-
-    public final void removeRole(String community, String group, String role) {
-        this.grmanager.removeRole(community, group, role);
-    }
-
-    public final boolean hasRole(String community, String group, String role) {
-        return this.grmanager.hasRole(community, group, role);
-    }
-
-     */
     public final boolean isInOrganization(Organization organization) {
         return this.grmanager.compare(organization);
     }
@@ -420,45 +365,24 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      *
      * @return
      */
-    public final Address getAddress() {
-        return address;
+    public Address getAddress() {
+        return this.address;
     }
 
     /**
-     * Add probe in the agent
-     *
-     * @param obs
-     */
-    public final void addProbe(Probe obs) {
-        this.addObserver(obs);
-        this.probes.add(obs);
-    }
-
-    /**
-     * Remove probe in the agent
-     *
-     * @param obs
-     */
-    public final void removeProbe(Probe obs) {
-        this.deleteObserver(obs);
-        this.probes.remove(obs);
-    }
-
-    /**
-     * Remove all probes
-     */
-    public final void flushProbes() {
-        this.deleteObservers();
-        this.probes.removeAll(this.probes);
-    }
-
-    /**
-     * Return all probes
      *
      * @return
      */
-    public final ArrayList<Probe> getProbes() {
-        return this.probes;
+    public ProbesManager getProbesManager() {
+        return this.probesManager;
+    }
+
+    public SensorsManager getSensorsManager() {
+        return this.sensorsManager;
+    }
+
+    public Scheduler getScheduler() {
+        return this.scheduler;
     }
 
     /**
@@ -468,37 +392,6 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
      */
     public final void killAgent(Agent<?> agt) {
         agt.kill();
-    }
-
-    /**
-     * Add a sensor
-     *
-     * @param sensor
-     */
-    public final void addSensor(Sensor<?> sensor) {
-        sensor.addObserver(this);
-        this.sensors.add(sensor);
-
-    }
-
-    /**
-     * Remove a sensor
-     *
-     * @param sensor
-     */
-    public final void removeSensor(Sensor<?> sensor) {
-        sensor.deleteObserver(this);
-        this.sensors.remove(sensor);
-    }
-
-    /**
-     * Remove all the sensors
-     */
-    public final void flushSensors() {
-        sensors.forEach((sens) -> {
-            sens.deleteObserver(this);
-        });
-        this.sensors.removeAll(this.sensors);
     }
 
     /**
