@@ -372,6 +372,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
         return this.grmanager;
     }
 
+    /*
     public final void joinCommunity(String community) {
         this.grmanager.joinCommunity(community);
     }
@@ -409,6 +410,7 @@ public abstract class Agent<T> extends Observable implements Serializable, Runna
         return this.grmanager.hasRole(community, group, role);
     }
 
+     */
     public final boolean isInOrganization(Organization organization) {
         return this.grmanager.compare(organization);
     }

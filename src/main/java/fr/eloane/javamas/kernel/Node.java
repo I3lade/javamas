@@ -39,6 +39,7 @@ public final class Node implements Observer {
     private static Node comm = null;
     private final HashMap<String, Agent<?>> agents = new HashMap<>();
     private final ArrayList<Transport> transports = new ArrayList<>();
+    private ArrayList<String> messageIds = new ArrayList<>();
 
     private Node() {
     }
@@ -152,7 +153,7 @@ public final class Node implements Observer {
                     agents.get(id).pushMessage(mes);
                 }
             });
-        } 
+        }
         if (mes.getOrganizations().size() > 0) {
             mes.getOrganizations().forEach((organisation) -> {
                 this.agents.values().stream().filter((agent) -> (agent.isInOrganization(organisation) && !agent.getAddress().getId().equals(mes.getSender()))).forEachOrdered((agent) -> {
@@ -217,7 +218,11 @@ public final class Node implements Observer {
     @Override
     public void update(Observable o, Object arg) {
         if (arg instanceof Message) {
-            this.sendMessage((Message) arg);
+            Message mes = (Message) arg;
+            if (!this.messageIds.contains(mes.getId())) {
+                this.messageIds.add(mes.getId());
+                this.sendMessage((Message) arg);
+            }
         }
     }
 
