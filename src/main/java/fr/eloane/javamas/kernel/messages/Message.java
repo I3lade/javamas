@@ -28,7 +28,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import fr.eloane.javamas.kernel.Node;
-import fr.eloane.javamas.kernel.datas.SynchronizedTree;
 import fr.eloane.javamas.kernel.organization.Organization;
 
 /**
@@ -213,7 +212,9 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     }
 
     /**
+     *
      * @param s
+     * @return
      */
     public final Message<T> addReceiver(String s) {
         ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
@@ -228,6 +229,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param s
+     * @return
      */
     public final Message<T> removeReceiver(String s) {
         ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
@@ -242,6 +244,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param r
+     * @return
      */
     public final Message<T> addReceivers(ArrayList<String> r) {
         ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
@@ -256,6 +259,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param r
+     * @return
      */
     public final Message<T> setReceivers(ArrayList<String> r) {
         this.put(Message.RECEIVERS, r);
@@ -275,6 +279,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
 
     /**
      *
+     * @return
      */
     public final Message<T> removeReceivers() {
         this.remove(Message.RECEIVERS);
@@ -284,6 +289,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param t
+     * @return
      */
     public final Message<T> addOrganization(Organization t) {
         ArrayList<Organization> organizations = this.getOrganizations();
@@ -295,6 +301,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param t
+     * @return
      */
     public final Message<T> removeOrganization(Organization t) {
         ArrayList<Organization> organizations = this.getOrganizations();
@@ -303,6 +310,11 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
         return this;
     }
 
+    /**
+     *
+     * @param t
+     * @return
+     */
     public final Message<T> setOrganization(Organization t) {
         ArrayList<Organization> organizations = new ArrayList<>();
         organizations.add(t);
@@ -310,11 +322,20 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
         return this;
     }
 
+    /**
+     *
+     * @param organizations
+     * @return
+     */
     public final Message<T> setOrganizations(ArrayList<Organization> organizations) {
         this.put(Message.RECEIVERS_ORGANIZATIONS, organizations);
         return this;
     }
 
+    /**
+     *
+     * @return
+     */
     public final Message<T> removeOrganizations() {
         this.remove(RECEIVERS_ORGANIZATIONS);
         return this;
@@ -369,6 +390,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      *
      * @param key
      * @param value
+     * @return
      */
     public final Message<T> setField(String key, Object value) {
         if (!key.equals(Message.CREATED) && !key.equals(Message.MESSAGE_ID)) {
@@ -408,6 +430,11 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
         }
     }
 
+    /**
+     *
+     * @param o
+     * @return
+     */
     @Override
     public boolean equals(Object o) {
         if (o instanceof Message) {
