@@ -3,6 +3,8 @@
 ## Java Multi-Agents System
 
 
+[![Maintainability](https://api.codeclimate.com/v1/badges/782876893a84c694b0a1/maintainability)](https://codeclimate.com/github/guillaumemonet/javamas/maintainability)
+
 The term agent that is most often used is undoubtedly the most difficult to define. 
 In the computer world, the concept of agent is still badly determined. 
 
