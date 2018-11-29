@@ -23,7 +23,6 @@
  */
 package fr.eloane.javamas.kernel.transport;
 
-import java.util.ArrayList;
 import java.util.Observable;
 import fr.eloane.javamas.kernel.messages.Message;
 import java.util.HashMap;
@@ -35,8 +34,6 @@ import java.util.HashMap;
 public abstract class Transport extends Observable implements Runnable {
 
     private boolean stop = false;
-
-    //private final ArrayList<String> messages = new ArrayList<>();
     protected HashMap<String, String> parameters;
 
     /**
@@ -77,7 +74,6 @@ public abstract class Transport extends Observable implements Runnable {
     public final void run() {
         while (!stop) {
             Message message = waitMessage();
-            //this.messages.add(message.getId());
             this.setChanged();
             this.notifyObservers(message);
         }
