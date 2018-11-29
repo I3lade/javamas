@@ -162,24 +162,6 @@ public final class Node implements Observer {
             });
         }
         this.broadcastMessage(mes);
-        //
-
-        /*if (mes.getOrganizations() != null) {
-            mes.getOrganizations().forEach((org) -> {
-                agents.keySet().stream().filter((id) -> (!mes.getSender().equals(id))).forEachOrdered((id) -> {
-                    org.getChilds().stream().filter((groups) -> (agents.get(id).hasGroupe(groups.getRoot()))).forEachOrdered((groups) -> {
-                        if (!groups.isLeaf()) {
-                            groups.getChilds().stream().filter((roles) -> (agents.get(id).hasRole(groups.getRoot(), roles.getRoot()))).forEachOrdered((_item) -> {
-                                agents.get(id).pushMessage(mes);
-                            });
-                        } else {
-                            agents.get(id).pushMessage(mes);
-                        }
-                    });
-                });
-            });
-            broadcastMessage(mes);
-        }*/
     }
 
     /**
