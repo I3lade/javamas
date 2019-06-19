@@ -32,7 +32,6 @@ import java.io.ObjectOutputStream;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.MulticastSocket;
 import java.util.HashMap;
 
 /**
@@ -104,7 +103,6 @@ public class TransportUDP extends Transport {
             datagramSocket.receive(datagramPacket);
             byteArrayInputStream = new ByteArrayInputStream(datagramPacket.getData());
             objectInputStream = new ObjectInputStream(byteArrayInputStream);
-            System.out.println("RECEIVE UDP");
             return (Message) objectInputStream.readObject();
         } catch (NullPointerException | IOException | ClassNotFoundException | ClassCastException e) {
             e.printStackTrace();
