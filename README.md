@@ -17,9 +17,13 @@ There are two main types of software agents: **cognitive agents** and **reactive
 All characteristics of an agent can be described as follows:
 
 * **Communication**: allows agents to communicate with each other and send each other information.
+
 * **Perception**: agents perceive their environment, this can be modeled by various sensors (sensitive, thermal, electroluminescent).
+
 * **Action**: Each agent acts with his environment. These actions can represent jacks.
+
 * **Knowledge**: it is the "memory" of the agents, it is it that allows the agent to make decisions.
+
 * **Decision**: allows agents to determine what actions to take or not, depending on their perceptions and knowledge.
 
 
@@ -41,8 +45,22 @@ In addition, an agent is characterized by its ability to communicate with other 
 ## Internal State
 
 In order to dissociate the internal state of each agent, it has a five-part arrangement.
+
 * **Activation**, the agent starts, activates its functions and dialog methods.
-* **The live cycle** is the most important period for the agent. Here all messages are sent and processed.
-* **The end of life** (end) of the agent, it can still process certain information.
+
+* **Live** The live cycle is the most important period for the agent. Here all messages are sent and processed.
+
+* **End** The end of life of the agent, it can still process certain information.
+
 * **Kill**, the agent has finished his activity and is permanently destroyed.
+
 * **Reset**, the agent is reset (if it needs to be reused).
+
+
+
+## How to use it
+
+
+
+
+
