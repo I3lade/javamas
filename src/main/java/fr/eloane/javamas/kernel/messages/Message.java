@@ -33,11 +33,6 @@ import fr.eloane.javamas.kernel.organization.Organization;
 /**
  * Project: JavaMAS: Java Multi-Agents System File: Message.java
  *
- * @param <T> content of the message
- * @link http://guillaume.monet.free.fr
- * @copyright 2003-2013 Guillaume Monet
- *
- * @author Guillaume Monet <guillaume dot monet at free dot fr> @version 1.1
  */
 public class Message<T> extends HashMap<String, Object> implements Cloneable, Serializable, Comparable<Message<?>> {
 
