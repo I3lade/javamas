@@ -32,6 +32,8 @@ import java.util.Observer;
  */
 public class SensorsManager extends ArrayList<Sensor> {
 
+    private static final long serialVersionUID = 1L;
+
     private final Observer observer;
 
     public SensorsManager(Observer observer) {
