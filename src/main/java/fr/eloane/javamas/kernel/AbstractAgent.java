@@ -23,6 +23,7 @@
  */
 package fr.eloane.javamas.kernel;
 
+import fr.eloane.javamas.kernel.sensors.Sensor;
 import java.io.Serializable;
 import java.util.Observable;
 import java.util.Observer;
@@ -34,6 +35,8 @@ import java.util.Observer;
 public abstract class AbstractAgent extends Observable implements Serializable, Observer, Runnable {
 
     private static final long serialVersionUID = -4353825708388962018L;
+
+    protected transient boolean daemon = false;
 
     /**
      * Initialize of the Agent can be overridden
@@ -62,4 +65,56 @@ public abstract class AbstractAgent extends Observable implements Serializable, 
     protected void reset() {
 
     }
+
+    protected void kill() {
+
+    }
+
+    /**
+     * Start the life cycle
+     */
+    public final void start() {
+        Thread th = new Thread(this);
+        th.setDaemon(daemon);
+        th.start();
+    }
+
+    /**
+     * Life of the agent destroy all objects from the agents
+     */
+    @Override
+    public final void run() {
+        this.init();
+        this.activate();
+        this.live();
+        this.end();
+        this.kill();
+    }
+
+    /**
+     * Method to override if sensors want to be handled Handle trigger of the
+     * sensor (pattern observer is used)
+     *
+     * @param sensor sensor that trigger the event
+     */
+    protected void handleSensor(Sensor<?> sensor) {
+        System.out.println(sensor.getValue().toString());
+    }
+
+    /**
+     * Handle update for observer pattern
+     *
+     * @param o observable that trigger the update event
+     * @param arg
+     * @throws ClassCastException
+     */
+    @Override
+    public final void update(Observable o, Object arg) throws ClassCastException {
+        if (o instanceof Sensor<?>) {
+            handleSensor((Sensor<?>) o);
+        } else {
+            throw new ClassCastException("Can't cast " + o.getClass() + " to " + Sensor.class);
+        }
+    }
+
 }

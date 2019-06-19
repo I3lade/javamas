@@ -27,9 +27,6 @@ import fr.eloane.javamas.kernel.probes.Probe;
 import fr.eloane.javamas.kernel.sensors.Sensor;
 import java.io.Serializable;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Observable;
-import java.util.Observer;
 import fr.eloane.javamas.kernel.messages.Message;
 import fr.eloane.javamas.kernel.datas.SynchronizedPriority;
 import fr.eloane.javamas.kernel.organization.Organization;
@@ -41,7 +38,7 @@ import fr.eloane.javamas.kernel.sensors.SensorsManager;
  * @author Guillaume Monet
  * @param <T>
  */
-public abstract class Agent<T> extends AbstractAgent implements Serializable, Runnable, Observer {
+public abstract class Agent<T> extends AbstractAgent implements Serializable {
 
     private static final long serialVersionUID = -3591756155645176746L;
 
@@ -54,17 +51,15 @@ public abstract class Agent<T> extends AbstractAgent implements Serializable, Ru
     private final SynchronizedPriority<Message<?>> messages = new SynchronizedPriority<>();
     private final Organization grmanager = new Organization();
     private final Scheduler scheduler = new Scheduler();
-    private final AgentHistory history = new AgentHistory();
     private final Database<T> database = null;
     private String name = "";
-    private transient boolean daemon = false;
+    
 
     /**
      * Create new Agent
      */
     public Agent() {
         this.address = new Address();
-        //database = new Database<T>(true);
         this.register();
     }
 
@@ -114,32 +109,13 @@ public abstract class Agent<T> extends AbstractAgent implements Serializable, Ru
         Node.getHandle().unregister(this);
     }
 
-    /**
-     * Life of the agent init initGUI activate live end kill private method
-     * destroy all objects from the agents
-     */
-    @Override
-    public final void run() {
-        this.init();
-        this.activate();
-        this.live();
-        this.end();
-        this.kill();
-    }
-
-    /**
-     * Start the life cycle
-     */
-    public final void start() {
-        Thread th = new Thread(this);
-        th.setDaemon(daemon);
-        th.start();
-    }
+    
 
     /**
      * Kill de agent
      */
-    private void kill() {
+    @Override
+    protected void kill() {
         this.unregister();
         this.flushMessage();
         this.getProbesManager().flushProbes();
@@ -295,17 +271,7 @@ public abstract class Agent<T> extends AbstractAgent implements Serializable, Ru
      */
     public final void pushMessage(Message<?> mes) {
         messages.push(mes);
-        history.add(mes);
         this.notifyMessagesChanged();
-    }
-
-    /**
-     *
-     * @param conditions
-     * @return
-     */
-    public final ArrayList<Message> retreiveMessage(HashMap<String, String> conditions) {
-        return history.getMessages(conditions);
     }
 
     /**
@@ -352,10 +318,19 @@ public abstract class Agent<T> extends AbstractAgent implements Serializable, Ru
         }
     }
 
+    /**
+     *
+     * @return
+     */
     public final Organization getOrganization() {
         return this.grmanager;
     }
 
+    /**
+     *
+     * @param organization
+     * @return
+     */
     public final boolean isInOrganization(Organization organization) {
         return this.grmanager.compare(organization);
     }
@@ -377,46 +352,20 @@ public abstract class Agent<T> extends AbstractAgent implements Serializable, Ru
         return this.probesManager;
     }
 
+    /**
+     *
+     * @return
+     */
     public SensorsManager getSensorsManager() {
         return this.sensorsManager;
     }
 
+    /**
+     *
+     * @return
+     */
     public Scheduler getScheduler() {
         return this.scheduler;
     }
 
-    /**
-     * Kill an agent
-     *
-     * @param agt
-     */
-    public final void killAgent(Agent<?> agt) {
-        agt.kill();
-    }
-
-    /**
-     * Method to override if sensors want to be handled Handle trigger of the
-     * sensor (pattern observer is used)
-     *
-     * @param sensor sensor that trigger the event
-     */
-    protected void handleSensor(Sensor<?> sensor) {
-        System.out.println(sensor.getValue().toString());
-    }
-
-    /**
-     * Handle update for observer pattern
-     *
-     * @param o observable that trigger the update event
-     * @param arg
-     * @throws ClassCastException
-     */
-    @Override
-    public final void update(Observable o, Object arg) throws ClassCastException {
-        if (o instanceof Sensor<?>) {
-            handleSensor((Sensor<?>) o);
-        } else {
-            throw new ClassCastException("Can't cast " + o.getClass() + " to " + Sensor.class);
-        }
-    }
 }
