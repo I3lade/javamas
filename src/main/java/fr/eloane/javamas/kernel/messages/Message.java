@@ -353,6 +353,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param priority
+     * @return
      */
     public final Message<T> setPriority(int priority) {
         this.put(Message.PRIORITY, priority);
@@ -404,18 +405,31 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      */
     @Override
     public int compareTo(Message<?> mess) {
+        int priority = this.comparePriority(mess);
+        if (priority == 0) {
+            return this.compareTime(mess);
+        } else {
+            return priority;
+        }
+    }
+
+    private int comparePriority(Message<?> mess) {
         if (this.getPriority() < mess.getPriority()) {
             return 1;
         } else if (this.getPriority() > mess.getPriority()) {
             return -1;
         } else {
-            if (this.getTime() < mess.getTime()) {
-                return 1;
-            } else if (this.getTime() > mess.getTime()) {
-                return -1;
-            } else {
-                return 0;
-            }
+            return 0;
+        }
+    }
+
+    private int compareTime(Message<?> mess) {
+        if (this.getTime() < mess.getTime()) {
+            return 1;
+        } else if (this.getTime() > mess.getTime()) {
+            return -1;
+        } else {
+            return 0;
         }
     }
 
