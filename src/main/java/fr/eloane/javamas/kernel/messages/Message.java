@@ -259,11 +259,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      * @return
      */
     public final ArrayList<String> getReceivers() {
-        ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
-        if (receivers == null) {
-            receivers = new ArrayList<>();
-        }
-        return receivers;
+        return (ArrayList<String>) this.getArray(Message.RECEIVERS);
     }
 
     /**
@@ -335,11 +331,15 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      * @return
      */
     public final ArrayList<Organization> getOrganizations() {
-        ArrayList<Organization> organizations = (ArrayList<Organization>) this.get(Message.RECEIVERS_ORGANIZATIONS);
-        if (organizations == null) {
-            organizations = new ArrayList<>();
+        return (ArrayList<Organization>) this.getArray(Message.RECEIVERS_ORGANIZATIONS);
+    }
+
+    private ArrayList getArray(String type) {
+        ArrayList array = (ArrayList) this.get(type);
+        if (array == null) {
+            array = new ArrayList<>();
         }
-        return organizations;
+        return array;
     }
 
     /**
