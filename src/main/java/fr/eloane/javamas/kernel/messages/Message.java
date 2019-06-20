@@ -33,6 +33,7 @@ import fr.eloane.javamas.kernel.organization.Organization;
 /**
  * Project: JavaMAS: Java Multi-Agents System File: Message.java
  *
+ * @param <T>
  */
 public class Message<T> extends HashMap<String, Object> implements Cloneable, Serializable, Comparable<Message<?>> {
 
@@ -183,6 +184,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
     /**
      *
      * @param content
+     * @return
      */
     public final Message<T> setContent(T content) {
         this.content = content;
@@ -191,6 +193,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
 
     /**
      * @param s
+     * @return
      */
     public final Message<T> setSender(String s) {
         this.put(Message.SENDER, s);
@@ -212,10 +215,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      * @return
      */
     public final Message<T> addReceiver(String s) {
-        ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
-        if (receivers == null) {
-            receivers = new ArrayList<>();
-        }
+        ArrayList<String> receivers = this.getReceivers();
         receivers.add(s);
         this.setReceivers(receivers);
         return this;
@@ -227,10 +227,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      * @return
      */
     public final Message<T> removeReceiver(String s) {
-        ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
-        if (receivers == null) {
-            receivers = new ArrayList<>();
-        }
+        ArrayList<String> receivers = this.getReceivers();
         receivers.remove(s);
         this.setReceivers(receivers);
         return this;
@@ -242,10 +239,7 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
      * @return
      */
     public final Message<T> addReceivers(ArrayList<String> r) {
-        ArrayList<String> receivers = (ArrayList<String>) this.get(Message.RECEIVERS);
-        if (receivers == null) {
-            receivers = new ArrayList<>();
-        }
+        ArrayList<String> receivers = this.getReceivers();
         receivers.addAll(r);
         this.setReceivers(receivers);
         return this;
