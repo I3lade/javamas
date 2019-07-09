@@ -413,6 +413,11 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
         }
     }
 
+    /**
+     *
+     * @param mess
+     * @return
+     */
     private int comparePriority(Message<?> mess) {
         if (this.getPriority() < mess.getPriority()) {
             return 1;
@@ -423,6 +428,11 @@ public class Message<T> extends HashMap<String, Object> implements Cloneable, Se
         }
     }
 
+    /**
+     *
+     * @param mess
+     * @return
+     */
     private int compareTime(Message<?> mess) {
         if (this.getTime() < mess.getTime()) {
             return 1;

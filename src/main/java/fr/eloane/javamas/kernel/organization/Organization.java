@@ -73,6 +73,7 @@ public class Organization extends SynchronizedTree<String> {
      *
      * @param community
      * @param group
+     * @return 
      */
     public Organization joinGroup(String community, String group) {
         this.addNode(community).addNode(group);
@@ -103,6 +104,7 @@ public class Organization extends SynchronizedTree<String> {
      * @param community
      * @param group
      * @param role
+     * @return 
      */
     public Organization addRole(String community, String group, String role) {
         this.addNode(community).addNode(group).addNode(role);
