@@ -100,7 +100,6 @@ public final class TransportMulticast extends Transport {
             multicastSocket.receive(datagramPacket);
             byteArrayInputStream = new ByteArrayInputStream(datagramPacket.getData());
             objectInputStream = new ObjectInputStream(byteArrayInputStream);
-            System.out.println("RECEIVE MULTICAST");
             return (Message) objectInputStream.readObject();
         } catch (NullPointerException | IOException | ClassNotFoundException | ClassCastException e) {
             e.printStackTrace();
