@@ -61,6 +61,118 @@ In order to dissociate the internal state of each agent, it has a five-part arra
 ## How to use it
 
 
+### Simple example : Agents Dialog one the same node
+```java
+
+import fr.eloane.javamas.kernel.Agent;
+import fr.eloane.javamas.kernel.messages.Message;
+
+/**
+ *
+ * @author Guillaume Monet
+ */
+public class Listener extends Agent<String>{
+
+    @Override
+    protected void activate() {
+        this.getOrganization().joinCommunity("WORLD");
+    }
+
+    @Override
+    protected void live() {
+        Message mess = this.waitNextMessage();
+        System.out.println(mess);
+    }
+
+    @Override
+    protected void end() {
+        
+    }
+    
+}
+
+```
+
+```java
+import fr.eloane.javamas.kernel.Agent;
+import fr.eloane.javamas.kernel.messages.Message;
+import fr.eloane.javamas.kernel.organization.Organization;
+
+/**
+ *
+ * @author Guillaume Monet
+ */
+public class Sender extends Agent<String> {
+    
+    @Override
+    protected void activate() {
+        this.getOrganization().joinCommunity("WORLD");
+    }
+    
+    @Override
+    protected void live() {
+        Message mess = new Message("Hello World");
+        mess.addOrganization(new Organization("WORLD"));
+        this.sendMessage(mess);
+    }
+    
+    @Override
+    protected void end() {
+        
+    }
+    
+}
+
+```
+
+```java
+
+/**
+ *
+ * @author Guillaume Monet
+ */
+public class Launch {
+    public static void main(String[] args){
+        (new Listener()).start();
+        (new Sender()).start();
+    }
+}
+
+```
+
+
+
+### Waiting for message for 5 seconds
+```java
+
+import fr.eloane.javamas.kernel.Agent;
+
+public class Waiting extends Agent {
+
+    @Override
+    public void activate() {
+        this.getOrganization().joinGroup("TEST", "WAITER");
+    }
+
+    @Override
+    public void live() {
+        this.println("WAITING FOR MESSAGE");
+        this.waitNextMessage(5000);
+        this.println("NO MORE WAITING");
+    }
+
+    @Override
+    public void end() {
+    }
+
+    public static void main(String[] args) {
+        (new Waiting()).start();
+    }
+}
+
+```
+
+
 
 
 
